@@ -3,6 +3,7 @@
 """
 import pymysql
 import hashlib
+import time
 
 # 编写功能类，提供给服务端使用
 class Database:
@@ -68,3 +69,40 @@ class Database:
 			return False
 
 
+	# 插入历史记录
+	def insert_history(self, name, word):
+		tm = time.ctime()
+
+		sql = 'insert into hist (name, word, time) values (%s,%s,%s)'
+		try:
+			self.cur.execute(sql, [name, word, tm])
+			self.db.commit()
+		except Exception:
+			self.db.rollback()
+
+	# 查单词
+	def query(self, word):
+		sql = 'select mean from words where word = %s'
+		self.cur.execute(sql, [word])
+		r = self.cur.fetchone()
+		if r:
+			return r[0]
+
+
+	# 历史记录
+	def history(self, name):
+		sql = 'select name, word, time from hist where name=%s order by id desc limit 10'
+		self.cur.execute(sql, [name])
+		return self.cur.fetchall()		
+
+
+
+
+
+
+
+
+
+
+
+	

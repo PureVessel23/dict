@@ -58,7 +58,34 @@ def do_login():
 		print('登录失败')
 	return
 
-	
+# 查词
+def do_query(name):
+	while True:
+		word = input('word:')
+		# 结束单词查询
+		if word == "##":
+			break
+
+		msg = 'Q %s %s' % (name, word)
+		s.send(msg.encode())
+		data = s.recv(2048).decode()
+		
+		print(data)
+
+# 历史记录
+def do_history(name):
+	msg = 'H %s' % (name)
+	s.send(msg.encode())
+	data = s.recv(128).decode()
+	if data == 'OK':
+		while True:
+			data = s.recv(1024).decode()
+			if data == '##':
+				break
+			print(data)
+	else:
+		print('无历史记录')
+
 # 二级界面
 def login(name):
         while True:
@@ -68,9 +95,9 @@ def login(name):
                 """)
                 cmd = input('请输入选项:')
                 if cmd == '1':
-                        pass
+                        do_query(name)
                 elif cmd == '2':
-                        pass
+                        do_history(name)
                 elif cmd == '3':
                         return
                 else:
@@ -83,7 +110,7 @@ def main():
 	
 	while True:
 		print("""
-		------------welcome--------------
+		------------Welcome--------------
 		1. 注册      2. 登录      3. 退出
 		""")	
 		cmd = input('请输入选项:')
@@ -92,7 +119,9 @@ def main():
 		elif cmd == '2':
 			do_login()
 		elif cmd == '3':
-			pass
+			s.send(b'E')
+			print('Thanks for use')
+			return
 		else:
 			print('请输入正确命令')
 

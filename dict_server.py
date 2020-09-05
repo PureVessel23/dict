@@ -7,6 +7,7 @@ from socket import *
 from multiprocessing import Process
 import signal
 import sys
+from time import sleep
 from operation_db import *
 
 # 全局变量
@@ -50,11 +51,18 @@ def do_request(c, db):
 	db.create_cursor()
 	while True:
 		data = c.recv(1024).decode()
-		print(c.getpeername(), ':', data)
-		if data[0] == 'R':
-			do_register(c, db, data)
+		if not data or data[0] == 'E':
+			c.close()
+			sys.exit('客户端退出')
 		elif data[0] == 'L':
 			do_login(c, db, data)
+		elif data[0] == 'R':
+			do_register(c, db, data)
+		elif data[0] == 'Q':
+			do_query(c, db, data)
+		elif data[0] == 'H':
+			do_history(c, db, data)
+			
 
 
 # 处理注册
@@ -78,6 +86,53 @@ def do_login(c, db, data):
 		c.send(b'OK')
 	else:
 		c.send(b'FAIT')
+
+# 处理查询
+def do_query(c, db, data):
+	tmp = data.split(' ')
+	name = tmp[1]
+	word = tmp[2]
+
+	# 插入历史记录
+	db.insert_history(name, word)
+
+	# 查单词
+	mean = db.query(word)
+
+	if not mean:
+		c.send(b'Not Found!')
+	else:
+		msg = '%s : %s' % (word, mean)
+		c.send(msg.encode())
+
+# 历史记录
+def do_history(c, db, data):
+	name = data.split(' ')[1]
+
+	hist = db.history(name)
+
+	if not hist:
+		c.send(b'FAIL')
+		return
+	
+	c.send(b'OK')
+
+	for i in hist:
+		msg = '%s         %s          %s' % (i)				
+		sleep(0.1)
+		c.send(msg.encode())
+
+	# 防止粘包
+	sleep(0.1)	
+	c.send(b'##')
+
+
+
+
+
+
+
+
 
 
 
