@@ -53,6 +53,9 @@ def do_request(c, db):
 		print(c.getpeername(), ':', data)
 		if data[0] == 'R':
 			do_register(c, db, data)
+		elif data[0] == 'L':
+			do_login(c, db, data)
+
 
 # 处理注册
 def do_register(c, db, data):
@@ -64,6 +67,21 @@ def do_register(c, db, data):
 		c.send(b'OK')
 	else:
 		c.send(b'FAIT')
+
+# 处理登录
+def do_login(c, db, data):
+	tmp = data.split(' ')
+	name = tmp[1]
+	passwd = tmp[2]
+
+	if db.login(name, passwd):
+		c.send(b'OK')
+	else:
+		c.send(b'FAIT')
+
+
+
+
 	
 
 if __name__ == '__main__':

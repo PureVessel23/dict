@@ -52,5 +52,19 @@ class Database:
 			self.db.rollback()
 			return False
 
+	# 处理登录
+	def login(self, name, passwd):
+		
+		hash = hashlib.md5((name + 'the-salt').encode())
+		hash.update(passwd.encode())
+
+		sql = 'select * from user where name = %s and passwd = %s'
+		self.cur.execute(sql, [name, hash.hexdigest()])
+		r = self.cur.fetchone()
+
+		if r:
+			return True
+		else:
+			return False
 
 
