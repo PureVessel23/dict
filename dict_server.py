@@ -45,7 +45,7 @@ def main():
 		p.start()
 
 # 处理客户端请求
-def do_request(c, addr):
+def do_request(c, db):
 	# 生成游标
 	db.create_cursor()
 	while True:
@@ -59,6 +59,12 @@ def do_register(c, db, data):
 	tmp = data.split(' ')
 	name = tmp[1]
 	passwd = tmp[2]	
+
+	if db.register(name, passwd):
+		c.send(b'OK')
+	else:
+		c.send(b'FAIT')
+	
 
 if __name__ == '__main__':
 	main()

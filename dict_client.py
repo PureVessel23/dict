@@ -13,7 +13,7 @@ s = socket()
 s.connect(ADDR)
 
 # 注册
-def do_regiser():
+def do_register():
 	while True:
 		name = input('User:')
 		passwd = getpass()
